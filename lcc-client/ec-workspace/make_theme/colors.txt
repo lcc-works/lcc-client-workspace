@@ -1,0 +1,47 @@
+# Colours for the server-list theme.
+#
+# !! THIS FILE IS NOT READ BY index.html. !!
+# It belonged to the old `theme.py` generator, which no longer exists. The
+# colours now live in the page itself: set them with the Accent / Gradient
+# start / Background colour inputs in index.html, or paste values straight
+# into the JSON. This file is kept only as a record of the palette that was
+# used, and is ignored.
+#
+# One "name = value" per line. Lines starting with # or ; are comments, and
+# anything after a value on the same line is ignored too.
+#
+# Accepted value formats:  #4CAF50    4CAF50    0x4CAF50    5025616
+# The theme is drawn on a dark background, so keep entries bright enough to
+# read against `bg`.
+#
+# Note: the client treats #000000 as "unset" and substitutes its own default,
+# so avoid pure black for `accent`, `accentDark` and `bg`.
+
+# --- Server entry (shipped to the client inside the hidden marker) ---
+
+# Accent: left bar around the entry, border, ping text.
+accent = #4CAF50
+
+# Darker accent: the top of the entry's gradient.
+accentDark = #2E7D32
+
+# Entry background.
+bg = #101014
+
+# --- Text ---
+
+# Server name in the entry.
+name = #FFFFFF
+
+# MOTD line under the server name.
+motd = #B9B9C2
+
+# MOTD line as vanilla clients render it. Also used for the comparison box in
+# preview.html, so you can see how close the two renderings look.
+subtitle = #AAAAAA
+
+# --- preview.html only ---
+
+pageBg = #16161A
+pageText = #E6E6E6
+pageMuted = #8A8A92

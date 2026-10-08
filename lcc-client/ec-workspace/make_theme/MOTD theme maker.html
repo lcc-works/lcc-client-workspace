@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MOTD theme maker</title>
+<style>
+:root{color-scheme:dark;--bg:#14141a;--tx:#e8e8ee;--mu:#8b8b96;--bd:#2b2b34;--in:#0e0e13;--ac:#2f6feb}
+:root[data-theme="light"]{color-scheme:light;--bg:#f2f2f6;--tx:#1a1a22;--mu:#666672;--bd:#d0d0da;--in:#fff}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){color-scheme:light;--bg:#f2f2f6;--tx:#1a1a22;--mu:#666672;--bd:#d0d0da;--in:#fff}}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;padding:calc(24px + env(safe-area-inset-top,0px)) 18px calc(50px + env(safe-area-inset-bottom,0px));color:var(--tx);font:14px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1200px;margin:0 auto}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:22px;align-items:start}
+aside{position:sticky;top:calc(14px + env(safe-area-inset-top,0px))}
+.pv{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0));border:1px solid var(--bd);border-radius:12px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+.pvh{font-size:13px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.pvh:before{content:"";width:8px;height:8px;border-radius:50%;background:#2ea043;box-shadow:0 0 8px #2ea043}
+.pvl{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin:12px 0 6px}
+.vrow{display:flex;gap:10px;background:#000;border:1px solid #333;border-radius:3px;padding:6px;font:13px/1.25 ui-monospace,Menlo,Consolas,monospace;color:#aaa}
+.vicon{flex:0 0 48px;height:48px;background:linear-gradient(135deg,#5fb04a 0 48%,#6b4a2b 49%);image-rendering:pixelated;border-radius:2px}
+.vtx{min-width:0;flex:1}.vname{color:#fff;display:flex;justify-content:space-between}.vname span{color:#55ff55;font-size:11px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}aside{position:static;order:-1}}
+h1{font-size:20px;margin:0 0 4px}.sub,.hint{color:var(--mu);font-size:12px;margin:4px 0}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--mu);margin:26px 0 8px}
+fieldset{border:1px solid var(--bd);border-radius:7px;padding:12px 14px;margin:0 0 12px}
+legend{font-size:11px;padding:0 5px;text-transform:uppercase;letter-spacing:.07em;color:var(--mu)}
+label{display:block;font-size:11.5px;color:var(--mu);margin:8px 0 3px}
+input[type=text],textarea{width:100%;background:var(--in);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:6px 8px;font:12.5px ui-monospace,Menlo,Consolas,monospace}
+input[type=range]{width:100%;accent-color:var(--ac)}
+input[type=color]{width:38px;height:28px;padding:2px;background:var(--in);border:1px solid var(--bd);border-radius:4px;cursor:pointer}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button{font:inherit}
+.b{background:var(--in);color:var(--tx);border:1px solid var(--bd);border-radius:5px;padding:5px 10px;font-size:12.5px;cursor:pointer;min-width:32px}
+.b:hover{border-color:var(--ac)}
+.copy{background:var(--ac);color:#fff;border:0;border-radius:5px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer}
+.copy.done{background:#2ea043}
+.sw{width:22px;height:22px;border-radius:5px;border:1px solid rgba(0,0,0,.5);padding:0;cursor:pointer}
+.sw:hover{transform:scale(1.2)}
+#editor{min-height:84px;background:#0b0b0f;color:#aaa;border:1px solid var(--bd);border-radius:5px;padding:10px 12px;font:15px/1.5 ui-monospace,Menlo,Consolas,monospace;outline:none;margin-top:8px}
+#editor:focus{border-color:var(--ac)}
+.meter{font-size:11.5px;color:var(--mu);margin-top:5px}
+.warns{font-size:12px;color:#d29922;margin-top:4px}
+pre.out{background:#0b0b0f;color:#d6d6e0;border:1px solid var(--bd);border-radius:5px;padding:10px;font-size:11.5px;white-space:pre-wrap;word-break:break-all;margin:0 0 8px;max-height:260px;overflow:auto}
+.mc{background:#1b1b22;border:1px solid #2e2e38;border-radius:5px;padding:10px 12px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;color:#aaa;margin-bottom:8px}
+.mc small{display:block;color:#6f6f7c;font-size:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.card{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 12px;border-radius:8px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 4px 14px rgba(0,0,0,.35);font-family:ui-monospace,Menlo,Consolas,monospace}
+.card .tx{min-width:0}.card .nm{font-size:14px;line-height:1.25;font-weight:700;color:#fff}.card .md{font-size:12px;line-height:1.25;color:#aaa}
+.card img{width:28px;height:28px;image-rendering:pixelated}
+.card .ping{margin-left:auto;font-size:11px}
+.warn{border-left:3px solid #d29922;padding-left:10px}
+.tabs{display:flex;gap:4px;margin:16px 0}
+.tabs button{background:var(--in);color:var(--mu);border:1px solid var(--bd);border-radius:6px;padding:8px 14px;cursor:pointer}
+.tabs button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>MOTD theme maker</h1>
+<p class="sub">Style two lines of text, then export for Eaglercraft (themed or legacy) or a Velocity proxy.</p>
+
+<div class="grid"><div class="main">
+<fieldset>
+<legend>1. Write &amp; style</legend>
+<div class="row">
+ <button class="b" data-cmd="bold"><b>B</b></button>
+ <button class="b" data-cmd="italic"><i>I</i></button>
+ <button class="b" data-cmd="underline"><u>U</u></button>
+ <button class="b" data-cmd="strikeThrough"><s>S</s></button>
+ <button class="b" data-cmd="removeFormat">Reset</button>
+ <button class="b" id="btnUndo">Undo</button>
+</div>
+<div class="row" id="swatches" style="margin-top:8px"></div>
+<div class="row" style="margin-top:8px">
+ <input type="color" id="hexPick" value="#3ddc84"><button class="b" id="hexApply">Apply hex</button>
+ <span class="hint">Gradient</span>
+ <input type="color" id="gA" value="#ffd24a"><input type="color" id="gB" value="#4caf50">
+ <button class="b" id="gradApply">Apply gradient</button>
+ <button class="b" id="rainbow">Rainbow</button>
+</div>
+<div id="editor" contenteditable="true" spellcheck="false" role="textbox" aria-multiline="true"></div>
+<div class="meter" id="meter"></div>
+<div class="warns" id="warns"></div>
+<p class="hint">Line 1 is the server name on the themed card, line 2 is the subtitle. Select text to style part of it. Gradient and Rainbow only affect the text you have highlighted.</p>
+</fieldset>
+
+<fieldset>
+<legend>Import</legend>
+<label for="importBox">Paste a legacy §/&amp; string, a JSON chat component, or a server_motd block from listeners.toml</label>
+<textarea id="importBox" rows="3" spellcheck="false"></textarea>
+<div class="row" style="margin-top:8px">
+ <button class="copy" id="btnImport">Import MOTD</button>
+ <input type="file" id="importFile" accept=".toml,text/plain">
+</div>
+<p class="hint" id="importStatus">Nothing imported yet.</p>
+</fieldset>
+
+<fieldset>
+<legend>Theme &mdash; Eaglercraft only</legend>
+<div class="row">
+ <div><label for="accent">Accent</label><input type="color" id="accent" value="#4caf50"></div>
+ <div><label for="accentDark">Gradient start</label><input type="color" id="accentDark" value="#2e7d32"></div>
+ <div><label for="bg">Background</label><input type="color" id="bg" value="#101014"></div>
+</div>
+<label for="angle">Gradient angle &mdash; <span id="angleVal">100</span>&deg;</label>
+<input type="range" id="angle" min="0" max="359" value="100">
+<p class="hint">0&deg; runs left to right, 90&deg; top to bottom.</p>
+<label for="logo">Logo (64&times;64 PNG, optional)</label>
+<input type="file" id="logo" accept="image/png">
+</fieldset>
+
+<fieldset id="fsFallback">
+<legend>What other clients see</legend>
+<p class="hint">A client only gets the themed card if it asks for one (the 1.14 browser client does). Everything else &mdash; vanilla, older versions, the server list API &mdash; reads the MOTD as plain text. Choose here what that plain-text rendering should be.</p>
+<div class="row" style="margin-bottom:8px">
+  <label for="fbMode" style="margin:0">Show them</label>
+  <select id="fbMode">
+    <option value="per-character">The same text, converted &mdash; nearest of the 16 classic colours</option>
+    <option value="stepped">The same text, converted in visible bands</option>
+    <option value="custom">My own text instead (below)</option>
+    <option value="raw">The raw themed JSON (1.16+ clients only)</option>
+  </select>
+</div>
+<div id="fbSteps">
+<label for="steps">Gradient bands &mdash; <span id="stepsVal">5</span></label>
+<input type="range" id="steps" min="1" max="16" value="5">
+<p class="hint">Only used for <b>bands</b>. 1 is a single flat colour; higher values step through more of the 16 classic colours. Converted <b>per character</b> looks smoothest, but 16 codes cannot carry a 24-bit gradient, so shades that are neighbours end up on the same code and the gradient flattens out. Fewer, wider bands stay visible.</p>
+</div>
+<div id="fbCustom" hidden>
+<label for="fbText">Their MOTD &mdash; one line per row</label>
+<textarea id="fbText" rows="2" spellcheck="false">&amp;bLCC Network
+&amp;7lol its a server</textarea>
+<p class="hint">Section codes, <code>&amp;</code; or <code>§</code>, plus any text. Sent to every client that did not ask for the theme, so it needs no gradient of its own to look right.</p>
+</div>
+<div id="fbWarn"></div>
+</fieldset>
+
+<div class="tabs"><button id="tabEagler" class="on">Eaglercraft</button><button id="tabVelocity">Velocity &mdash; MiniMessage</button></div>
+
+<section id="paneEagler">
+<h2 id="legacyH">1. Legacy codes &mdash; works everywhere</h2>
+<p class="hint" id="legacyHint">Plain string with § codes. This is what clients which did not ask for the theme receive.</p>
+<pre class="out" id="legacyOut"></pre><button class="copy" data-copy="legacyOut">Copy</button>
+<p class="hint" id="escHint">For <code>server.properties</code> the § must be escaped:</p>
+<pre class="out" id="escOut"></pre><button class="copy" data-copy="escOut">Copy</button>
+
+<h2>2. Themed MOTD &mdash; 1.14 client only</h2>
+<p class="hint warn">Adds the hidden <code>eagler_theme</code> marker. The MOTD becomes a JSON chat component, so clients that cannot parse those show raw JSON.</p>
+<pre class="out" id="jsonOut"></pre><button class="copy" data-copy="jsonOut">Copy</button>
+
+<h2>3. EaglerXServer &mdash; listeners.toml</h2>
+<p class="hint warn">Paste over the <code>server_motd</code> line in <code>plugins/eaglerxserver/listeners.toml</code>. The <code>'''</code> multi-line literal string is required; a plain <code>"..."</code> cannot span lines and breaks the whole config.</p>
+<pre class="out" id="tomlOut"></pre><button class="copy" data-copy="tomlOut">Copy</button>
+
+<h2>4. eaglermotd plugin settings</h2>
+<p class="hint">The themed MOTD above is all a client that asked for the theme needs. The <code>eaglermotd</code> Velocity plugin decides what every <i>other</i> client sees, so this block has to match your choice under <b>What other clients see</b>. Copy it into <code>velocity/plugin-src/net/lcc/eaglermotd/EaglerThemeMOTDPlugin.java</code> and rebuild.</p>
+<pre class="out" id="pluginOut"></pre><button class="copy" data-copy="pluginOut">Copy</button>
+
+</section>
+
+<section id="paneVelocity" hidden>
+<h2>MiniMessage MOTD</h2>
+<p class="hint warn">This is Velocity's own <code>motd</code>, so no theme marker. If you run <code>eaglerxserver</code>, use the Eaglercraft tab instead.</p>
+<pre class="out" id="mmOut"></pre><button class="copy" data-copy="mmOut">Copy</button>
+<h2>velocity.toml</h2>
+<pre class="out" id="vtomlOut"></pre><button class="copy" data-copy="vtomlOut">Copy</button>
+</section>
+</div>
+<aside><div class="pv"><div class="pvh">Live preview</div>
+<div class="pvl">Themed card (Eaglercraft)</div>
+<div class="card" id="card"><span id="cardLogo"></span><div class="tx"><div class="nm" id="cardName"></div><div class="md" id="cardSub"></div></div><div class="ping" id="cardPing"></div></div>
+<div class="pvl" id="vanillaLabel">Vanilla server list</div>
+<div class="vrow"><div class="vicon"></div><div class="vtx"><div class="vname">Minecraft Server<span>42ms</span></div><div id="vanillaView"></div></div></div>
+<p class="hint" id="vanillaHint">The themed card only renders on the 1.14 Eaglercraft client; everything else sees the vanilla row.</p>
+</div></aside>
+</div>
+</div>
+
+<script>
+"use strict";
+var $ = function (id) { return document.getElementById(id); };
+var PAL = {"0":"#000000","1":"#0000AA","2":"#00AA00","3":"#00AAAA","4":"#AA0000","5":"#AA00AA","6":"#FFAA00","7":"#AAAAAA","8":"#555555","9":"#5555FF","a":"#55FF55","b":"#55FFFF","c":"#FF5555","d":"#FF55FF","e":"#FFFF55","f":"#FFFFFF"};
+var NAMES = {black:"0",dark_blue:"1",dark_green:"2",dark_aqua:"3",dark_red:"4",dark_purple:"5",gold:"6",gray:"7",dark_gray:"8",blue:"9",green:"a",aqua:"b",red:"c",light_purple:"d",yellow:"e",white:"f"};
+var NARROW = {" ":4,"!":2,".":2,",":2,":":2,";":2,"'":3,"i":2,"l":3,"|":2,"I":4,"t":4,"f":5,"k":5,"[":4,"]":4,"`":3};
+var MAX_PX = 250;
+var segs = [];
+var logoData = null;
+
+function blank() { return {t:"", c:null, b:false, i:false, u:false, s:false}; }
+function esc(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function hexToInt(h) { return parseInt(h.replace("#",""),16) & 0xFFFFFF; }
+function intToHex(n) { var v = (typeof n === "number" ? n : parseInt(n,10)) & 0xFFFFFF; if (isNaN(v) || v === 0) return null; return "#" + ("000000"+v.toString(16)).slice(-6); }
+function rgbToHex(r) { var m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(r); if (!m) return null; return "#" + [1,2,3].map(function (i) { return ("0"+(+m[i]).toString(16)).slice(-2); }).join("").toUpperCase(); }
+function sameStyle(a,b) { return a.c===b.c && a.b===b.b && a.i===b.i && a.u===b.u && a.s===b.s; }
+function merge(list) {
+  var out = [];
+  list.forEach(function (s) {
+    if (!s.t) return;
+    var p = out[out.length-1];
+    if (p && sameStyle(p,s)) p.t += s.t; else out.push(Object.assign({}, s));
+  });
+  return out;
+}
+function splitLines(list) {
+  var lines = [[]];
+  list.forEach(function (s) {
+    s.t.split("\n").forEach(function (part, i) {
+      if (i > 0) lines.push([]);
+      if (part) lines[lines.length-1].push(Object.assign({}, s, {t:part}));
+    });
+  });
+  return lines;
+}
+function plain(list) { return list.map(function (s) { return s.t; }).join(""); }
+function px(line) {
+  var n = 0;
+  line.forEach(function (s) { for (var k = 0; k < s.t.length; k++) { n += (NARROW[s.t[k]] || 6) + (s.b ? 1 : 0); } });
+  return n;
+}
+
+// ------------------------------------------------------- editor <-> segments
+function parseDom(root) {
+  var out = [];
+  function walk(node, st) {
+    for (var k = 0; k < node.childNodes.length; k++) {
+      var n = node.childNodes[k];
+      if (n.nodeType === 3) { out.push(Object.assign({}, st, {t:n.nodeValue.replace(/\u00a0/g," ")})); continue; }
+      if (n.nodeType !== 1) continue;
+      if (n.tagName === "BR") { out.push(Object.assign({}, st, {t:"\n"})); continue; }
+      var ns = Object.assign({}, st), s = n.style, tg = n.tagName;
+      if (tg==="B"||tg==="STRONG") ns.b = true;
+      if (tg==="I"||tg==="EM") ns.i = true;
+      if (tg==="U") ns.u = true;
+      if (tg==="S"||tg==="STRIKE"||tg==="DEL") ns.s = true;
+      if (tg==="FONT" && n.color) ns.c = n.color.toUpperCase();
+      if (s.color) ns.c = rgbToHex(s.color) || ns.c;
+      if (s.fontWeight === "bold" || +s.fontWeight >= 600) ns.b = true;
+      if (s.fontStyle === "italic") ns.i = true;
+      var td = s.textDecorationLine || s.textDecoration || "";
+      if (td.indexOf("underline") > -1) ns.u = true;
+      if (td.indexOf("line-through") > -1) ns.s = true;
+      if ((tg==="DIV"||tg==="P") && out.length && out[out.length-1].t.slice(-1) !== "\n") out.push(Object.assign({}, st, {t:"\n"}));
+      walk(n, ns);
+    }
+  }
+  walk(root, blank());
+  var m = merge(out);
+  if (m.length) m[m.length-1].t = m[m.length-1].t.replace(/\n+$/,"");
+  return merge(m);
+}
+function segStyle(s) {
+  var c = s.c ? "color:" + s.c + ";" : "";
+  if (s.b) c += "font-weight:700;";
+  if (s.i) c += "font-style:italic;";
+  var d = []; if (s.u) d.push("underline"); if (s.s) d.push("line-through");
+  if (d.length) c += "text-decoration:" + d.join(" ") + ";";
+  return c;
+}
+function toHtml(list) {
+  return list.map(function (s) {
+    return s.t.split("\n").map(function (p) { return p ? '<span style="' + segStyle(s) + '">' + esc(p) + "</span>" : ""; }).join("<br>");
+  }).join("");
+}
+function setSegs(list) { segs = merge(list); $("editor").innerHTML = toHtml(segs); refresh(); }
+
+// ------------------------------------------------------------------ parsing
+function parseLegacy(str, base) {
+  var out = [], cur = Object.assign(blank(), base || {}), i = 0;
+  function flush() { if (cur.t) { out.push(cur); cur = Object.assign({}, cur, {t:""}); } }
+  while (i < str.length) {
+    var ch = str[i];
+    if ((ch === "§" || ch === "&") && i + 1 < str.length) {
+      var n = str[i+1], lo = n.toLowerCase();
+      if (n === "#" && /^[0-9a-f]{6}$/i.test(str.substr(i+2,6))) { flush(); cur.c = "#" + str.substr(i+2,6).toUpperCase(); i += 8; continue; }
+      if (lo === "x") {
+        var hx = "", ok = true, seg = str.substr(i+2,12);
+        for (var j = 0; j < 12; j += 2) { if (seg.length === 12 && (seg[j]==="§"||seg[j]==="&") && /[0-9a-f]/i.test(seg[j+1])) hx += seg[j+1]; else ok = false; }
+        if (ok && seg.length === 12) { flush(); cur.c = "#" + hx.toUpperCase(); i += 14; continue; }
+      }
+      if (PAL[lo]) { flush(); cur = Object.assign(blank(), {c:PAL[lo]}); i += 2; continue; }
+      if ("lonmkr".indexOf(lo) > -1) {
+        flush();
+        if (lo === "r") cur = blank(); else if (lo==="l") cur.b = true; else if (lo==="o") cur.i = true; else if (lo==="n") cur.u = true; else if (lo==="m") cur.s = true;
+        i += 2; continue;
+      }
+    }
+    cur.t += ch; i++;
+  }
+  flush();
+  return merge(out);
+}
+function compToSegs(node, base) {
+  base = base || blank();
+  if (node == null) return [];
+  if (typeof node === "string") return parseLegacy(node, base);
+  if (Array.isArray(node)) return [].concat.apply([], node.map(function (n) { return compToSegs(n, base); }));
+  if (typeof node !== "object") return [];
+  var st = Object.assign({}, base);
+  if (typeof node.color === "string") {
+    if (node.color[0] === "#") st.c = node.color.toUpperCase();
+    else if (NAMES[node.color]) st.c = PAL[NAMES[node.color]];
+  }
+  if (node.bold === true) st.b = true; if (node.bold === false) st.b = false;
+  if (node.italic === true) st.i = true;
+  if (node.underlined === true) st.u = true;
+  if (node.strikethrough === true) st.s = true;
+  var out = [];
+  if (typeof node.text === "string") out = parseLegacy(node.text, st);
+  if (Array.isArray(node.extra)) out = out.concat(compToSegs(node.extra, st));
+  return out;
+}
+
+// ------------------------------------------------------------------ import
+function extractToml(src) {
+  var lit = src.match(/server_motd\s*=\s*\[\s*'''([\s\S]*?)'''\s*\]/);
+  if (lit) return lit[1];
+  var basic = src.match(/server_motd\s*=\s*\[\s*"((?:[^"\\]|\\.)*)"\s*\]/);
+  if (basic) return basic[1].replace(/\\"/g,'"').replace(/\\n/g,"\n").replace(/\\\\/g,"\\").replace(/\\t/g,"\t");
+  return null;
+}
+function applyTheme(o) {
+  var t = o && o.eagler_theme; if (!t || typeof t !== "object") return false;
+  var a = intToHex(t.accent); if (a) $("accent").value = a;
+  var d = intToHex(t.accentDark); if (d) $("accentDark").value = d;
+  var b = intToHex(t.bg); if (b) $("bg").value = b;
+  if (typeof t.angle === "number") $("angle").value = Math.max(0, Math.min(359, t.angle));
+  if (typeof t.logo === "string" && t.logo) { logoData = t.logo; $("logo").value = ""; }
+  return true;
+}
+function importMotd(raw) {
+  var src = String(raw || "").trim(), st = $("importStatus");
+  if (!src) { st.textContent = "Nothing to import - the box is empty."; return; }
+  var payload = src;
+  if (/server_motd\s*=/.test(src) || /^\s*\[/.test(src)) {
+    var f = extractToml(src);
+    if (f == null) { st.textContent = "Could not find a server_motd assignment."; return; }
+    payload = f.trim();
+  }
+  if (payload[0] === "{" || payload[0] === "[") {
+    var obj;
+    try { obj = JSON.parse(payload); } catch (e) { st.textContent = "Looks like JSON but does not parse: " + e.message; return; }
+    var themed = applyTheme(obj);
+    setSegs(compToSegs(obj));
+    st.textContent = themed ? "Imported text and theme." : "Imported plain JSON MOTD (no eagler_theme); theme fields left as they are.";
+    return;
+  }
+  var s = parseLegacy(payload);
+  if (!plain(s).trim()) { st.textContent = "Could not find any text to import."; return; }
+  setSegs(s);
+  st.textContent = "Imported a legacy MOTD; theme fields left as they are.";
+}
+
+// ------------------------------------------------------------------ builders
+function cc(h) {
+  var k = Object.keys(PAL).filter(function (x) { return PAL[x] === h; })[0];
+  return k ? "§" + k : "§x" + h.slice(1).toLowerCase().split("").map(function (d) { return "§" + d; }).join("");
+}
+function lineLegacy(line) {
+  var o = "", prev = false;
+  line.forEach(function (s) {
+    var st = !!(s.c || s.b || s.i || s.u || s.s);
+    if (prev) o += "§r";
+    if (st) o += (s.c ? cc(s.c) : "") + (s.b?"§l":"") + (s.i?"§o":"") + (s.u?"§n":"") + (s.s?"§m":"");
+    o += s.t; prev = st;
+  });
+  return o;
+}
+// Mirrors the weighted metric in EaglerThemeMOTDPlugin.distance: the red term
+// scales with how bright the pair is, the blue term with how dark. Plain
+// squared RGB puts pure #00ff00 on dark green and #ffff00 on gold.
+function nearest(h) {
+  var r = parseInt(h.substr(1,2),16), g = parseInt(h.substr(3,2),16), b = parseInt(h.substr(5,2),16), best = "#FFFFFF", bd = Infinity;
+  Object.keys(PAL).forEach(function (k) {
+    var p = PAL[k], r2 = parseInt(p.substr(1,2),16), g2 = parseInt(p.substr(3,2),16), b2 = parseInt(p.substr(5,2),16);
+    var rm = (r + r2) / 2, dr = r - r2, dg = g - g2, db = b - b2;
+    var d = (((512 + rm) * dr * dr) >> 8) + 4 * dg * dg + (((767 - rm) * db * db) >> 8);
+    if (d < bd) { bd = d; best = p; }
+  });
+  return best;
+}
+function nameOf(h) { var k = Object.keys(NAMES).filter(function (n) { return PAL[NAMES[n]] === h; })[0]; return k || h.toLowerCase(); }
+// This is the "legacy codes" output, so it has to follow the chosen fallback
+// mode rather than always converting the styled text.
+function buildLegacy() { return splitLines(fallbackText()).map(lineLegacy).join("\n"); }
+
+// ------------------------------------------------------- what others see
+function fbMode() { return $("fbMode").value; }
+function fbSteps() { return Math.max(1, parseInt($("steps").value, 10) || 1); }
+
+// Per-character: every segment keeps its own nearest classic colour.
+function fallbackSegsPerChar() {
+  return segs.map(function (s) { return s.c ? Object.assign({}, s, {c: nearest(s.c)}) : s; });
+}
+
+// Stepped: collapse each gradient into fixed-width bands along the text, so the
+// conversion lands on one solid colour per band instead of flickering. Each
+// line is banded on its own, matching the plugin, and the line breaks are kept
+// as segments so the text still reads as two lines.
+function fallbackSegsStepped() {
+  var lines = splitLines(segs);
+  var out = [];
+  lines.forEach(function (line, li) {
+    // An actual "\n" segment, not an empty one: merge() drops empty text, and
+    // without the break the two lines run together.
+    if (li) out.push(Object.assign(blank(), {t: "\n"}));
+    var colored = line.filter(function (s) { return !!s.c; });
+    var n = colored.length;
+    if (n) {
+      var bands = Math.max(1, Math.min(fbSteps(), n));
+      for (var b = 0; b < bands; b++) {
+        var low = Math.floor(b * n / bands), high = Math.floor((b + 1) * n / bands);
+        if (high <= low) continue;
+        var sr = 0, sg = 0, sb = 0;
+        for (var k = low; k < high; k++) { sr += parseInt(colored[k].c.substr(1,2),16); sg += parseInt(colored[k].c.substr(3,2),16); sb += parseInt(colored[k].c.substr(5,2),16); }
+        var width = high - low;
+        var avg = "#" + [sr, sg, sb].map(function (v) { return ("0" + Math.round(v / width).toString(16)).slice(-2); }).join("").toUpperCase();
+        var code = nearest(avg);
+        for (var j = low; j < high; j++) colored[j].c = code;
+      }
+    }
+    out = out.concat(line);
+  });
+  return out;
+}
+
+function fallbackSegs() {
+  if (fbMode() === "stepped") return merge(fallbackSegsStepped());
+  return merge(fallbackSegsPerChar());
+}
+
+// The plain-text MOTD other clients will actually receive.
+function fallbackText() {
+  if (fbMode() === "custom") return parseLegacy($("fbText").value);
+  if (fbMode() === "raw") return segs;
+  return fallbackSegs();
+}
+
+function buildPluginSnippet() {
+  var lines = [
+    "    // --- What clients that did NOT ask for a themed MOTD get to see. ---",
+    "    // Generated by the MOTD theme maker; rebuild with ./build.sh.",
+    ""
+  ];
+  if (fbMode() === "raw") {
+    lines.push("    static FallbackMode FALLBACK_MODE = FallbackMode.RAW;");
+  } else if (fbMode() === "custom") {
+    lines.push("    static FallbackMode FALLBACK_MODE = FallbackMode.CUSTOM;");
+  } else if (fbMode() === "stepped") {
+    lines.push("    static FallbackMode FALLBACK_MODE = FallbackMode.STEPPED;");
+    lines.push("    static int FALLBACK_STEPS = " + fbSteps() + ";");
+  } else {
+    lines.push("    static FallbackMode FALLBACK_MODE = FallbackMode.PER_CHARACTER;");
+  }
+  if (fbMode() === "custom") {
+    var raw = String($("fbText").value || "").split("\n").filter(function (l) { return l.trim(); });
+    lines.push("    static List<String> FALLBACK_MOTD = Arrays.asList(");
+    lines.push(raw.map(function (l) { return "            \"" + l.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\""; }).join(",\n"));
+    lines.push("    );");
+  } else {
+    lines.push("    static int FALLBACK_STEPS = " + fbSteps() + ";");
+  }
+  return lines.join("\n");
+}
+
+function comp(s) {
+  var c = {text:s.t};
+  if (s.c) c.color = s.c.toLowerCase();
+  if (s.b) c.bold = true; if (s.i) c.italic = true; if (s.u) c.underlined = true; if (s.s) c.strikethrough = true;
+  return c;
+}
+// The themed client's JSON keeps hex: the 1.14 client renders gradients from it,
+// so converting here is what made the gradient vanish.
+function buildJson() {
+  var theme = {v:1, accent:hexToInt($("accent").value), accentDark:hexToInt($("accentDark").value), bg:hexToInt($("bg").value),
+    gradient:true, angle:parseInt($("angle").value,10)||0, radius:6, showLogo:!!logoData, showMotd:true};
+  if (logoData) theme.logo = logoData;
+  var extra = [];
+  splitLines(segs).forEach(function (l, i) { if (i) extra.push({text:"\n"}); l.forEach(function (s) { extra.push(comp(s)); }); });
+  return JSON.stringify({text:"", eagler_theme:theme, extra:extra}, null, 2);
+}
+function buildListenerToml() {
+  var j = buildJson();
+  if (j.indexOf("'''") !== -1) return "# ERROR: the text contains ''' which cannot be escaped in a TOML literal string. Remove it and retry.";
+  return "server_motd = ['''" + j + "''']";
+}
+function buildMini() {
+  return splitLines(segs).map(function (l) {
+    return l.map(function (s) {
+      var t = s.t.replace(/</g, "\\<"), o = "", c = "";
+      [["b","b"],["i","i"],["u","u"],["s","st"]].forEach(function (f) { if (s[f[0]]) { o += "<" + f[1] + ">"; c = "</" + f[1] + ">" + c; } });
+      t = o + t + c;
+      return s.c ? "<" + s.c.toLowerCase() + ">" + t + "</" + s.c.toLowerCase() + ">" : t;
+    }).join("");
+  }).join("\n");
+}
+
+// ------------------------------------------------------------------ render
+function clientAngleToCss(a) { return (((a % 360) + 360) % 360) + 90; }
+function refresh() {
+  var lines = splitLines(segs), legacy = buildLegacy();
+  $("legacyOut").textContent = legacy;
+  $("escOut").textContent = "motd=" + legacy.replace(/§/g, "\\u00A7").replace(/\n/g, "\\n");
+  $("jsonOut").textContent = buildJson();
+  $("tomlOut").textContent = buildListenerToml();
+  $("pluginOut").textContent = buildPluginSnippet();
+  var mm = buildMini();
+  $("mmOut").textContent = mm;
+  $("vtomlOut").textContent = "motd = " + JSON.stringify(mm);
+
+  var steps = fbSteps();
+  $("stepsVal").textContent = steps;
+  $("fbSteps").hidden = fbMode() !== "stepped";
+  $("fbCustom").hidden = fbMode() !== "custom";
+
+  var fb = splitLines(fallbackText()), fw = fb.map(px), fwarn = [];
+  if (fb.length > 2) fwarn.push("Other clients will see " + fb.length + " lines; a server list shows 2.");
+  fw.forEach(function (n, i) { if (n > MAX_PX) fwarn.push("Their line " + (i+1) + " is about " + n + "px, over ~" + MAX_PX + "px, so it may be clipped."); });
+  if (fbMode() === "raw") fwarn.push("Raw JSON shows as a wall of text on anything older than 1.16.");
+  if (fbMode() === "per-character" && distinctColors(splitLines(segs)) < 2 && gradientish())
+    fwarn.push("Every character lands on the same classic colour, so they will see a flat colour, not a gradient. Try fewer bands.");
+  $("fbWarn").innerHTML = fwarn.map(esc).join("<br>");
+
+  var ang = parseInt($("angle").value,10) || 0;
+  $("angleVal").textContent = ang;
+  $("card").style.background = "linear-gradient(" + clientAngleToCss(ang) + "deg, " + $("accentDark").value + " 0%, " + $("bg").value + " 100%)";
+  $("cardName").innerHTML = toHtml(lines[0] || []);
+  $("cardSub").innerHTML = toHtml([].concat.apply([], (lines.slice(1)).map(function (l, i) { return (i ? [Object.assign(blank(), {t:"\n"})] : []).concat(l); })));
+  $("cardLogo").innerHTML = logoData ? '<img src="data:image/png;base64,' + logoData + '" alt="">' : "";
+  $("cardLogo").style.display = logoData ? "" : "none";
+  $("cardPing").textContent = "42ms"; $("cardPing").style.color = $("accent").value;
+  $("vanillaView").innerHTML = toHtml(fallbackText());
+
+  var m = fbMode();
+  $("vanillaLabel").textContent =
+    m === "custom" ? "Other clients \u2014 your text" :
+    m === "raw" ? "Other clients \u2014 raw JSON (1.16+)" :
+    m === "stepped" ? "Other clients \u2014 " + steps + " bands" :
+    "Other clients \u2014 per character";
+  $("vanillaHint").textContent =
+    m === "raw" ? "Raw JSON is only readable by 1.16 and newer; anything older shows this as literal text." :
+    m === "custom" ? "Sent verbatim to every client that did not ask for the theme." :
+    m === "stepped" ? "The gradient is collapsed into " + steps + " solid bands of the 16 classic colours." :
+    "Every character gets the nearest of the 16 classic colours. Smoothest, but 16 codes cannot carry a 24-bit gradient.";
+
+  var w = lines.map(px), warn = [];
+  if (lines.length > 2) warn.push("A server list shows only 2 lines; you have " + lines.length + ".");
+  w.forEach(function (n, i) { if (n > MAX_PX) warn.push("Line " + (i+1) + " is about " + n + "px, over ~" + MAX_PX + "px, so it may be clipped."); });
+  $("meter").textContent = plain(segs).length + " chars \u00b7 " + lines.length + " line" + (lines.length === 1 ? "" : "s") + " \u00b7 widths: " + (w.join("px, ") || "0") + "px";
+  $("warns").innerHTML = warn.map(esc).join("<br>");
+}
+function distinctColors(lines) {
+  var set = {};
+  lines.forEach(function (l) { l.forEach(function (s) { if (s.c) set[nearest(s.c)] = 1; }); });
+  return Object.keys(set).length;
+}
+function gradientish() {
+  var seen = {};
+  return splitLines(segs).some(function (l) { return l.some(function (s) { if (!s.c) return false; var n = nearest(s.c); if (seen[n]) return true; seen[n] = 1; return false; }); });
+}
+function fromEditor() { segs = parseDom($("editor")); refresh(); }
+
+// ------------------------------------------------------------------ effects
+function lerp(a, b, t) {
+  var x = [1,3,5].map(function (p) { var u = parseInt(a.substr(p,2),16), v = parseInt(b.substr(p,2),16); return ("0" + Math.round(u + (v-u)*t).toString(16)).slice(-2); });
+  return "#" + x.join("").toUpperCase();
+}
+function hsl(h) {
+  var s = .95, l = .6, k = function (n) { var a = (n + h/30) % 12, q = s*Math.min(l, 1-l); return l - q*Math.max(-1, Math.min(a-3, Math.min(9-a, 1))); };
+  return "#" + [0,8,4].map(function (n) { return ("0" + Math.round(k(n)*255).toString(16)).slice(-2); }).join("").toUpperCase();
+}
+var SENT = "#010203", lastRange = null;
+document.addEventListener("selectionchange", function () {
+  var sel = window.getSelection();
+  if (sel.rangeCount && $("editor").contains(sel.anchorNode) && $("editor").contains(sel.focusNode)) lastRange = sel.getRangeAt(0).cloneRange();
+});
+function perChar(fn) {
+  var ed = $("editor");
+  if (!lastRange || lastRange.collapsed) { $("warns").textContent = "Highlight some text first, then apply."; return; }
+  ed.focus();
+  var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(lastRange);
+  document.execCommand("foreColor", false, SENT);
+  var marked = parseDom(ed), chars = [];
+  marked.forEach(function (s) { s.t.split("").forEach(function (c) { chars.push(Object.assign({}, s, {t:c})); }); });
+  var idx = chars.filter(function (c) { return c.c === SENT && /\S/.test(c.t); }), n = 0;
+  if (!idx.length) { fromEditor(); $("warns").textContent = "Highlight some non-space text first."; return; }
+  chars.forEach(function (c) {
+    if (c.c === SENT) { if (/\S/.test(c.t)) { c.c = fn(idx.length < 2 ? 0 : n / (idx.length - 1)); n++; } else c.c = null; }
+  });
+  lastRange = null;
+  setSegs(chars);
+}
+
+// ------------------------------------------------------------------ wiring
+document.execCommand("styleWithCSS", false, true);
+Object.keys(PAL).forEach(function (k) {
+  var b = document.createElement("button");
+  b.className = "sw"; b.style.background = PAL[k]; b.title = "§" + k;
+  b.addEventListener("mousedown", function (e) { e.preventDefault(); });
+  b.addEventListener("click", function () { $("editor").focus(); document.execCommand("foreColor", false, PAL[k]); fromEditor(); });
+  $("swatches").appendChild(b);
+});
+document.querySelectorAll("[data-cmd]").forEach(function (b) {
+  b.addEventListener("mousedown", function (e) { e.preventDefault(); });
+  b.addEventListener("click", function () { $("editor").focus(); document.execCommand(b.getAttribute("data-cmd")); fromEditor(); });
+});
+$("hexApply").addEventListener("mousedown", function (e) { e.preventDefault(); });
+$("hexApply").addEventListener("click", function () { $("editor").focus(); document.execCommand("foreColor", false, $("hexPick").value); fromEditor(); });
+$("btnUndo").addEventListener("mousedown", function (e) { e.preventDefault(); });
+$("btnUndo").addEventListener("click", function () { $("editor").focus(); document.execCommand("undo"); fromEditor(); });
+["gradApply","rainbow"].forEach(function (id) { $(id).addEventListener("mousedown", function (e) { e.preventDefault(); }); });
+$("gradApply").addEventListener("click", function () { perChar(function (t) { return lerp($("gA").value, $("gB").value, t); }); });
+$("rainbow").addEventListener("click", function () { perChar(function (t) { return hsl(t * 300); }); });
+$("editor").addEventListener("input", fromEditor);
+$("editor").addEventListener("paste", function (e) {
+  var t = (e.clipboardData || window.clipboardData).getData("text");
+  e.preventDefault();
+  if (/[§&][0-9a-fk-orx#]/i.test(t)) { document.execCommand("insertHTML", false, toHtml(parseLegacy(t))); }
+  else document.execCommand("insertText", false, t);
+  fromEditor();
+});
+["fbMode","steps","fbText"].forEach(function (id) { $(id).addEventListener("input", refresh); $(id).addEventListener("change", refresh); });
+["accent","accentDark","bg","angle"].forEach(function (id) { $(id).addEventListener("input", refresh); });
+$("btnImport").addEventListener("click", function () { importMotd($("importBox").value); });
+$("importFile").addEventListener("change", function () {
+  var f = this.files && this.files[0]; if (!f) return;
+  var r = new FileReader(); r.onload = function () { importMotd(String(r.result)); }; r.readAsText(f);
+});
+$("logo").addEventListener("change", function (e) {
+  var f = e.target.files && e.target.files[0];
+  if (!f) { logoData = null; refresh(); return; }
+  var r = new FileReader();
+  r.onload = function () { logoData = String(r.result).split(",")[1] || null; refresh(); };
+  r.readAsDataURL(f);
+});
+$("tabEagler").addEventListener("click", function () { $("tabEagler").classList.add("on"); $("tabVelocity").classList.remove("on"); $("paneEagler").hidden = false; $("paneVelocity").hidden = true; });
+$("tabVelocity").addEventListener("click", function () { $("tabVelocity").classList.add("on"); $("tabEagler").classList.remove("on"); $("paneEagler").hidden = true; $("paneVelocity").hidden = false; });
+document.querySelectorAll("button.copy[data-copy]").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    var text = $(btn.getAttribute("data-copy")).textContent;
+    var done = function () { var o = btn.textContent; btn.textContent = "Copied"; btn.classList.add("done"); setTimeout(function () { btn.textContent = o; btn.classList.remove("done"); }, 1200); };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () {});
+  });
+});
+
+setSegs(parseLegacy("§6§lMy Server\n§7A themed server entry"));
+</script>
+</body>
+</html>
